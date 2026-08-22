@@ -58,7 +58,11 @@ jobs:
         run: npm run build
 
       - name: Publish to NPM
-        if: env.NODE_AUTH_TOKEN != ''
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: npm publish --access public --provenance
+        run: |
+          if [ -n "$NODE_AUTH_TOKEN" ]; then
+            npm publish --access public
+          else
+            echo "NPM_TOKEN secret is not set, skipping publish"
+          fi
