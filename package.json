@@ -1,6 +1,6 @@
 {
   "name": "dsh-plugin-memory",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "Persistent Knowledge Graph & Long-Term Memory Plugin for DeepSeek Harness (dsh)",
   "type": "module",
   "main": "dist/index.cjs",
