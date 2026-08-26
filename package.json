@@ -1,5 +1,5 @@
 {
-  "name": "dsh-plugin-memory",
+  "name": "@modelnorth/dsh-plugin-memory",
   "version": "1.0.0",
   "description": "Persistent Knowledge Graph & Long-Term Memory Plugin for DeepSeek Harness (dsh)",
   "type": "module",
