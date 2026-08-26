@@ -9,8 +9,14 @@ export class MemoryStore {
   private relations: MemoryRelation[] = [];
 
   constructor(customPath?: string) {
-    this.filePath =
-      customPath || path.join(os.homedir(), '.dsh', 'memory.json');
+    if (customPath) {
+      if (customPath.includes('\0')) {
+        throw new Error('[Security] Invalid memory file path: Null bytes are forbidden.');
+      }
+      this.filePath = path.resolve(customPath);
+    } else {
+      this.filePath = path.join(os.homedir(), '.dsh', 'memory.json');
+    }
     this.loadFromDisk();
   }
 
@@ -19,13 +25,28 @@ export class MemoryStore {
       if (fs.existsSync(this.filePath)) {
         const raw = fs.readFileSync(this.filePath, 'utf-8');
         const data = JSON.parse(raw);
-        if (Array.isArray(data.nodes)) {
-          for (const node of data.nodes) {
-            this.nodes.set(node.id, node);
+        if (data && typeof data === 'object') {
+          if (Array.isArray(data.nodes)) {
+            for (const node of data.nodes) {
+              if (node && typeof node === 'object' && typeof node.id === 'string' && typeof node.content === 'string') {
+                this.nodes.set(node.id, {
+                  id: String(node.id),
+                  type: node.type || 'fact',
+                  content: String(node.content),
+                  tags: Array.isArray(node.tags) ? node.tags.map(String) : [],
+                  createdAt: String(node.createdAt || new Date().toISOString()),
+                  updatedAt: String(node.updatedAt || new Date().toISOString()),
+                  accessCount: Number(node.accessCount || 0),
+                  importance: Number(node.importance || 5),
+                });
+              }
+            }
           }
-        }
-        if (Array.isArray(data.relations)) {
-          this.relations = data.relations;
+          if (Array.isArray(data.relations)) {
+            this.relations = data.relations.filter(
+              (r: any) => r && typeof r.fromId === 'string' && typeof r.toId === 'string' && typeof r.relation === 'string'
+            );
+          }
         }
       }
     } catch {
